@@ -90,16 +90,15 @@ public class NumberTriangle {
      *
      */
     public int retrieve(String path) {
-        int ret = -1;
-        NumberTriangle curr = this;
-        for (int i = 0; i < path.length(); i++){
-            if (path.charAt(i) == 'l'){
-                curr = curr.left;
+        if (path.length() == 0){
+            return this.root;
+        } else {
+            if (path.charAt(0) == 'l'){
+                return this.left.retrieve(path.substring(1));
             } else {
-                curr = curr.right;
+                return this.right.retrieve(path.substring(1));
             }
         }
-        return curr.getRoot();
     }
 
     /** Read in the NumberTriangle structure from a file.
@@ -119,6 +118,10 @@ public class NumberTriangle {
         InputStream inputStream = NumberTriangle.class.getClassLoader().getResourceAsStream(fname);
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
+
+        ArrayList<NumberTriangle> currParents = new ArrayList<>() {
+        };
+
         // will need to return the top of the NumberTriangle,
         // so might want a variable for that.
         NumberTriangle top = null;
@@ -128,11 +131,34 @@ public class NumberTriangle {
 
             // remove when done; this line is included so running starter code prints the contents of the file
 
+            String[] nums = line.split(" ");
+
+            if (top == null){
+                top = new NumberTriangle(Integer.parseInt(nums[0]));
+                currParents.add(top);
+            } else{
+                int length = currParents.size();
+                ArrayList<NumberTriangle> newParents = new ArrayList<>() {
+                };
+                for (int i = 0; i < length; i++){
+                    NumberTriangle triangle = currParents.get(0);
+                    NumberTriangle left = new NumberTriangle(Integer.parseInt(nums[i]));
+                    NumberTriangle right = new NumberTriangle(Integer.parseInt(nums[i+1]));
+                    triangle.setLeft(left);
+                    triangle.setRight(right);
+                    currParents.remove(0);
+                    currParents.add(left);
+                    if (i == length - 1){
+                        currParents.add(right);
+                    }
+                }
+            }
+
             //read the next line
             line = br.readLine();
-        }
-        br.close();
-        return top;
+            }
+            br.close();
+            return top;
     }
 
     public static void main(String[] args) throws IOException {
